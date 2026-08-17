@@ -26,6 +26,9 @@ config/icon="res://icon.svg"
 GameEvents="*res://scripts/autoload/GameEvents.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 AudioDirector="*res://scripts/autoload/AudioDirector.gd"
+MCPRuntimeBridge="*res://addons/godot_mcp/services/mcp_runtime_bridge.gd"
+MCPInputBridge="*res://addons/godot_mcp/services/mcp_input_bridge.gd"
+MCPScreenshotBridge="*res://addons/godot_mcp/services/mcp_screenshot_bridge.gd"
 
 [display]
 
@@ -33,6 +36,10 @@ window/size/viewport_width=1080
 window/size/viewport_height=1920
 window/stretch/mode="canvas_items"
 window/handheld/orientation="portrait"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
 
 [input_devices]
 
