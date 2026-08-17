@@ -11,6 +11,23 @@ var win_score: int = GameState.WIN_SCORE
 
 func _ready() -> void:
 	GameEvents.racer_scored.connect(_on_racer_scored)
+	_start_default_race()
+
+
+func _start_default_race() -> void:
+	var racer_ids: Array[int] = []
+	for i in GameState.RACER_COUNT:
+		racer_ids.append(i)
+	setup_race(racer_ids, GameState.player_racer_id)
+	_spawn_ai_controllers(racer_ids)
+
+
+func _spawn_ai_controllers(racer_ids: Array[int]) -> void:
+	var difficulty: GameState.Difficulty = GameState.difficulty_for_level(GameState.current_level)
+	for rid in racer_ids:
+		if rid == GameState.player_racer_id:
+			continue
+		add_child(AIController.new(rid, difficulty))
 
 
 func setup_race(racer_ids: Array[int], player_id: int) -> void:

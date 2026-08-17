@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://main_scene_root"]
+[gd_scene load_steps=5 format=3 uid="uid://main_scene_root"]
 
 [ext_resource type="PackedScene" path="res://scenes/race/Race.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ScoringBoard.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/core/RaceManager.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/core/BallThrower.gd" id="4"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -30,3 +31,13 @@ size_flags_vertical = 3
 [node name="ScoringBoard" parent="Split" instance=ExtResource("2")]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="ThrowLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("4")
