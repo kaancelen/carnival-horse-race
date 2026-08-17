@@ -7,13 +7,15 @@ extends Panel
 ## racer_ids order (player first, then AI lanes).
 ## -----------------------------------------------------------------------
 
-const HORSE_COLORS := [
-	Color(0.95, 0.85, 0.2),  # player - gold
-	Color(0.85, 0.3, 0.3),
-	Color(0.3, 0.6, 0.85),
-	Color(0.5, 0.8, 0.4),
-	Color(0.75, 0.4, 0.85),
+const HORSE_TEXTURES := [
+	preload("res://assets/sprites/horses/horse_gold.png"),      # player
+	preload("res://assets/sprites/horses/horse_chestnut.png"),
+	preload("res://assets/sprites/horses/horse_grey.png"),
+	preload("res://assets/sprites/horses/horse_white.png"),
+	preload("res://assets/sprites/horses/horse_pinto.png"),
 ]
+
+const MARKER_SIZE := Vector2(176, 132)
 
 var _horse_by_racer: Dictionary = {}
 var _lane_nodes: Array[Control] = []
@@ -33,6 +35,7 @@ func _on_race_started(_level_id: int) -> void:
 		var lane: Control = _lane_nodes[racer_id]
 		var marker := _make_horse_marker(racer_id)
 		lane.add_child(marker)
+		marker.position.y = (lane.size.y - marker.size.y) / 2.0
 		_horse_by_racer[racer_id] = marker
 		_position_marker(marker, lane, 0.0)
 
@@ -52,12 +55,8 @@ func _position_marker(marker: Control, lane: Control, progress: float) -> void:
 
 
 func _make_horse_marker(racer_id: int) -> Control:
-	var marker := Panel.new()
-	marker.size = Vector2(28, 16)
-	marker.position = Vector2(0, 2)
+	var marker := HorseMarker.new()
+	marker.size = MARKER_SIZE
 	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = HORSE_COLORS[racer_id % HORSE_COLORS.size()]
-	style.set_corner_radius_all(6)
-	marker.add_theme_stylebox_override("panel", style)
+	marker.set_horse_texture(HORSE_TEXTURES[racer_id % HORSE_TEXTURES.size()])
 	return marker

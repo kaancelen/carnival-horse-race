@@ -7,24 +7,24 @@ bg_color = Color(0.09, 0.16, 0.13, 1)
 
 [sub_resource type="StyleBoxFlat" id="red"]
 bg_color = Color(0.78, 0.18, 0.18, 1)
-corner_radius_top_left = 40
-corner_radius_top_right = 40
-corner_radius_bottom_left = 40
-corner_radius_bottom_right = 40
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_left = 28
+corner_radius_bottom_right = 28
 
 [sub_resource type="StyleBoxFlat" id="yellow"]
 bg_color = Color(0.9, 0.75, 0.15, 1)
-corner_radius_top_left = 32
-corner_radius_top_right = 32
-corner_radius_bottom_left = 32
-corner_radius_bottom_right = 32
+corner_radius_top_left = 42
+corner_radius_top_right = 42
+corner_radius_bottom_left = 42
+corner_radius_bottom_right = 42
 
 [sub_resource type="StyleBoxFlat" id="green"]
 bg_color = Color(0.16, 0.6, 0.32, 1)
-corner_radius_top_left = 26
-corner_radius_top_right = 26
-corner_radius_bottom_left = 26
-corner_radius_bottom_right = 26
+corner_radius_top_left = 56
+corner_radius_top_right = 56
+corner_radius_bottom_left = 56
+corner_radius_bottom_right = 56
 
 [node name="ScoringBoard" type="Panel"]
 layout_mode = 2
@@ -42,46 +42,53 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-alignment = 1
+theme_override_constants/separation = 44
+alignment = 0
+
+[node name="TopSpacer" type="Control" parent="Holes"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
 
 [node name="RedRow" type="HBoxContainer" parent="Holes"]
 layout_mode = 2
 alignment = 1
 
 [node name="HoleRed" type="Panel" parent="Holes/RedRow"]
-custom_minimum_size = Vector2(80, 80)
+custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("red")
 
 [node name="YellowRow" type="HBoxContainer" parent="Holes"]
 layout_mode = 2
+theme_override_constants/separation = 160
 alignment = 1
 
 [node name="HoleYellowL" type="Panel" parent="Holes/YellowRow"]
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(84, 84)
 layout_mode = 2
 theme_override_styles/panel = SubResource("yellow")
 
 [node name="HoleYellowR" type="Panel" parent="Holes/YellowRow"]
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(84, 84)
 layout_mode = 2
 theme_override_styles/panel = SubResource("yellow")
 
 [node name="GreenRow" type="HBoxContainer" parent="Holes"]
 layout_mode = 2
+theme_override_constants/separation = 260
 alignment = 1
 
 [node name="HoleGreenL" type="Panel" parent="Holes/GreenRow"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(112, 112)
 layout_mode = 2
 theme_override_styles/panel = SubResource("green")
 
 [node name="HoleGreenC" type="Panel" parent="Holes/GreenRow"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(112, 112)
 layout_mode = 2
 theme_override_styles/panel = SubResource("green")
 
 [node name="HoleGreenR" type="Panel" parent="Holes/GreenRow"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(112, 112)
 layout_mode = 2
 theme_override_styles/panel = SubResource("green")

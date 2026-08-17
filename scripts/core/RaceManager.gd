@@ -11,7 +11,7 @@ var win_score: int = GameState.WIN_SCORE
 
 func _ready() -> void:
 	GameEvents.racer_scored.connect(_on_racer_scored)
-	_start_default_race()
+	_start_default_race.call_deferred()
 
 
 func _start_default_race() -> void:

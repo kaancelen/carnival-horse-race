@@ -7,17 +7,20 @@ extends Control
 ## GameEvents.report_score() funnel AI opponents use.
 ## -----------------------------------------------------------------------
 
-const BALL_RADIUS := 16.0
+const BALL_RADIUS := 30.0
 const FLIGHT_TIME := 0.45
 const ARC_HEIGHT := 220.0
 const MIN_SWIPE_DISTANCE := 20.0
+const BALL_PARK_MARGIN_BOTTOM := 140.0
 
 var _drag_start: Vector2 = Vector2.ZERO
 var _dragging: bool = false
+var _current_ball: Control = null
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_spawn_ready_ball()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -39,6 +42,8 @@ func _handle_press_release(pressed: bool, pos: Vector2) -> void:
 func _on_swipe_released(start: Vector2, end: Vector2) -> void:
 	if not GameState.run_in_progress:
 		return
+	if _current_ball == null:
+		return
 	if start.distance_to(end) < MIN_SWIPE_DISTANCE:
 		return
 	var board := get_tree().get_first_node_in_group(&"scoring_board")
@@ -53,14 +58,14 @@ func _on_swipe_released(start: Vector2, end: Vector2) -> void:
 func _throw_ball(start: Vector2, target: Vector2, hole: ScoringHole) -> void:
 	GameEvents.ball_thrown.emit(GameState.player_racer_id, (target - start).normalized(), 1.0)
 
-	var ball := _make_ball()
-	add_child(ball)
-	ball.global_position = start - ball.size / 2.0
+	var ball := _current_ball
+	_current_ball = null
+	var origin := ball.global_position + ball.size / 2.0
 
 	var tween := create_tween()
 	tween.tween_method(
 		func(t: float) -> void:
-			var pos := start.lerp(target, t)
+			var pos := origin.lerp(target, t)
 			pos.y -= sin(t * PI) * ARC_HEIGHT
 			ball.global_position = pos - ball.size / 2.0,
 		0.0, 1.0, FLIGHT_TIME
@@ -69,7 +74,19 @@ func _throw_ball(start: Vector2, target: Vector2, hole: ScoringHole) -> void:
 		ball.queue_free()
 		GameEvents.ball_landed.emit(GameState.player_racer_id, hole.id)
 		GameEvents.report_score(GameState.player_racer_id, hole.points, hole.id)
+		_spawn_ready_ball()
 	)
+
+
+func _spawn_ready_ball() -> void:
+	var ball := _make_ball()
+	add_child(ball)
+	ball.position = _parked_position() - ball.size / 2.0
+	_current_ball = ball
+
+
+func _parked_position() -> Vector2:
+	return Vector2(size.x / 2.0, size.y - BALL_PARK_MARGIN_BOTTOM)
 
 
 func _make_ball() -> Control:

@@ -37,9 +37,14 @@ scripts/
 - **Scoring symmetry is enforced by construction**: `ScoringHole.POINTS_BY_TIER` gives 1×6 = 2×3 = 3×2 = 6,
   so tune from one place if that ever changes.
 
+## Third-party assets
+
+- `assets/sprites/horses/*.png` — "Horse Pack" by loota9 (http://linktr.ee/loota9), licensed
+  CC BY 4.0. Each file is a 64×48-cell animation sheet (idle/walk/run/rear/hit, side + front/back);
+  `HorseMarker.gd` currently only slices the row-12 gallop cycle out of it.
+
 ## Not built yet (still placeholder/stub)
 
-- Actual horse sprites/animation — Race.tscn has empty lane containers only
 - Swipe-to-throw input + ball physics — nothing captures touch yet
 - Hole *detection* (Area2D collision → `ball_landed`) — ScoringHole is data-only, no physical hookup
 - AudioDirector TODOs (tempo/tension mapping) — signals are wired, no actual audio nodes/streams yet
