@@ -3,28 +3,36 @@
 [ext_resource type="Script" path="res://scripts/core/ScoringBoardView.gd" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="bg"]
-bg_color = Color(0.09, 0.16, 0.13, 1)
+bg_color = Color(0.055, 0.137, 0.114, 1)
+border_width_top = 4
+border_color = Color(0.788, 0.529, 0.086, 1)
 
 [sub_resource type="StyleBoxFlat" id="red"]
-bg_color = Color(0.78, 0.18, 0.18, 1)
+bg_color = Color(0.784, 0.208, 0.173, 1)
 corner_radius_top_left = 28
 corner_radius_top_right = 28
 corner_radius_bottom_left = 28
 corner_radius_bottom_right = 28
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 6
 
 [sub_resource type="StyleBoxFlat" id="yellow"]
-bg_color = Color(0.9, 0.75, 0.15, 1)
+bg_color = Color(0.961, 0.725, 0.259, 1)
 corner_radius_top_left = 42
 corner_radius_top_right = 42
 corner_radius_bottom_left = 42
 corner_radius_bottom_right = 42
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 6
 
 [sub_resource type="StyleBoxFlat" id="green"]
-bg_color = Color(0.16, 0.6, 0.32, 1)
+bg_color = Color(0.275, 0.627, 0.333, 1)
 corner_radius_top_left = 56
 corner_radius_top_right = 56
 corner_radius_bottom_left = 56
 corner_radius_bottom_right = 56
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 6
 
 [node name="ScoringBoard" type="Panel"]
 layout_mode = 2

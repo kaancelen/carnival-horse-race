@@ -20,7 +20,37 @@ var _current_ball: Control = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_build_arc_hint()
+	_build_swipe_hint()
 	_spawn_ready_ball()
+
+
+func _build_arc_hint() -> void:
+	var arc := ArcHint.new()
+	var h := 220.0
+	arc.size = Vector2(6, h)
+	arc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var parked := _parked_position()
+	arc.position = Vector2(parked.x - 3.0, parked.y - BALL_RADIUS - h)
+	add_child(arc)
+
+
+func _build_swipe_hint() -> void:
+	var hint := Label.new()
+	hint.text = "👆 SWIPE — power & angle"
+	hint.add_theme_font_size_override("font_size", 18)
+	hint.add_theme_color_override("font_color", Color("d8be8a"))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint.anchor_left = 0.5
+	hint.anchor_right = 0.5
+	hint.anchor_top = 1.0
+	hint.anchor_bottom = 1.0
+	hint.offset_left = -220.0
+	hint.offset_right = 220.0
+	hint.offset_top = -(BALL_PARK_MARGIN_BOTTOM - BALL_RADIUS - 34.0)
+	hint.offset_bottom = -(BALL_PARK_MARGIN_BOTTOM - BALL_RADIUS - 8.0)
+	add_child(hint)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -90,11 +120,31 @@ func _parked_position() -> Vector2:
 
 
 func _make_ball() -> Control:
-	var ball := Panel.new()
+	var ball := Control.new()
 	ball.size = Vector2(BALL_RADIUS * 2, BALL_RADIUS * 2)
 	ball.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.95, 0.95, 0.9)
-	style.set_corner_radius_all(int(BALL_RADIUS))
-	ball.add_theme_stylebox_override("panel", style)
+
+	var base := Panel.new()
+	base.anchor_right = 1.0
+	base.anchor_bottom = 1.0
+	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var base_style := StyleBoxFlat.new()
+	base_style.bg_color = Color("c8352c")
+	base_style.set_corner_radius_all(int(BALL_RADIUS))
+	base_style.shadow_size = 6
+	base_style.shadow_color = Color(0, 0, 0, 0.4)
+	base.add_theme_stylebox_override("panel", base_style)
+	ball.add_child(base)
+
+	var shine_r := BALL_RADIUS * 0.5
+	var shine := Panel.new()
+	shine.position = Vector2(BALL_RADIUS * 0.3, BALL_RADIUS * 0.22)
+	shine.size = Vector2(shine_r, shine_r)
+	shine.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shine_style := StyleBoxFlat.new()
+	shine_style.bg_color = Color(1, 1, 1, 0.9)
+	shine_style.set_corner_radius_all(int(shine_r / 2.0))
+	shine.add_theme_stylebox_override("panel", shine_style)
+	ball.add_child(shine)
+
 	return ball
