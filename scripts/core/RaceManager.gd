@@ -5,12 +5,16 @@ extends Node
 ## (player, AI, future remote players) reports through. RaceManager never
 ## needs to know WHO scored, only that a racer_id did.
 
+const MAIN_MENU_SCENE_PATH := "res://scenes/menu/MainMenu.tscn"
+const RACE_END_RETURN_DELAY := 1.2
+
 var horses: Dictionary = {} # racer_id (int) -> Horse
 var win_score: int = GameState.WIN_SCORE
 
 
 func _ready() -> void:
 	GameEvents.racer_scored.connect(_on_racer_scored)
+	GameEvents.race_ended.connect(_on_race_ended)
 	_start_default_race.call_deferred()
 
 
@@ -69,3 +73,8 @@ func _check_race_end() -> void:
 		results.append({"racer_id": rid, "score": h.score})
 	results.sort_custom(func(a, b): return a["score"] > b["score"])
 	GameEvents.race_ended.emit(results)
+
+
+func _on_race_ended(_results: Array) -> void:
+	await get_tree().create_timer(RACE_END_RETURN_DELAY).timeout
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)

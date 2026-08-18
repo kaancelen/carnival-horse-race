@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Carnival Horse Race"
 config/description="Portrait-split carnival horse race arcade game. Swipe to throw balls, score holes, advance your horse."
-run/main_scene="res://scenes/main/Main.tscn"
+run/main_scene="res://scenes/launcher/Launcher.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 boot_splash/bg_color=Color(0.086, 0.086, 0.11, 1)
 config/icon="res://icon.png"
