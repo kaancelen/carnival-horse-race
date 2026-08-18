@@ -19,7 +19,7 @@ config/description="Portrait-split carnival horse race arcade game. Swipe to thr
 run/main_scene="res://scenes/main/Main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 boot_splash/bg_color=Color(0.086, 0.086, 0.11, 1)
-config/icon="res://icon.svg"
+config/icon="res://icon.png"
 
 [autoload]
 

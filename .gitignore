@@ -6,6 +6,7 @@
 *.translation
 export.cfg
 export_presets.cfg
+/output/
 
 # macOS
 .DS_Store
