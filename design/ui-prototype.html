@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Final Lap Final Race — UI/UX Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bungee&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS — Retro Carnival
+   ============================================================ */
+:root{
+  /* Surfaces */
+  --night:      #150F0E;   /* outermost backdrop, night */
+  --tent:       #2B1712;   /* tent deep maroon */
+  --tent-2:     #3A1E17;
+  --wood:       #4A2C1A;   /* wood board */
+  --wood-dark:  #2F1B10;
+
+  /* Paper / text surfaces */
+  --cream:      #F8EDD6;
+  --parchment:  #E9D5AC;
+  --parchment-2:#D8BE8A;
+
+  /* Carnival accents */
+  --red:        #C8352C;
+  --red-dark:   #8F2019;
+  --gold:       #F5B942;
+  --gold-deep:  #C98716;
+  --bulb:       #FFE9A8;   /* marquee bulb */
+  --teal:       #2E8C7E;
+  --teal-dark:  #1D5F55;
+  --green:      #46A055;
+  --green-dark: #2C6B37;
+  --ink:        #22120A;
+
+  /* Semantic */
+  --hole-red:   var(--red);
+  --hole-yellow:var(--gold);
+  --hole-green: var(--green);
+  --player:     var(--teal);
+
+  /* Type scale (px on the 1080x1920 canvas; ~1/3 in this prototype) */
+  --f-display:  'Alfa Slab One', Georgia, serif;
+  --f-marquee:  'Bungee', Impact, sans-serif;
+  --f-body:     'Rubik', system-ui, sans-serif;
+
+  /* Spacing 4pt grid */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+
+  --r-sm:8px; --r-md:14px; --r-lg:22px; --r-pill:999px;
+  --touch:44px;                     /* min touch target (prototype scale) */
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #2a1a24 0%, transparent 60%),
+    var(--night);
+  color:var(--cream);
+  font-family:var(--f-body);
+  min-height:100vh;
+  padding:28px 20px 60px;
+}
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+.page{max-width:1400px;margin:0 auto}
+.masthead{text-align:center;margin-bottom:28px}
+.masthead h1{
+  font-family:var(--f-display);font-size:34px;letter-spacing:.5px;
+  color:var(--gold);text-shadow:0 3px 0 var(--red-dark), 0 0 26px rgba(245,185,66,.35);
+}
+.masthead p{color:var(--parchment-2);font-size:14px;margin-top:8px}
+
+.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:22px 0 30px}
+.tab{
+  font-family:var(--f-body);font-weight:700;font-size:13px;letter-spacing:.4px;
+  background:var(--tent-2);color:var(--parchment);border:2px solid #55301f;
+  padding:10px 18px;border-radius:var(--r-pill);cursor:pointer;transition:.15s;
+}
+.tab:hover{background:var(--wood);color:var(--cream)}
+.tab.on{background:var(--gold);color:var(--ink);border-color:var(--bulb);box-shadow:0 0 20px rgba(245,185,66,.4)}
+
+.view{display:none}
+.view.on{display:block}
+
+/* ============================================================
+   PROTOTYPE GRID
+   ============================================================ */
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+  gap:44px 28px;justify-items:center;
+}
+.slot{width:100%;max-width:340px}
+.slot .cap{
+  text-align:center;margin-bottom:12px;
+}
+.slot .cap b{font-family:var(--f-marquee);font-size:13px;color:var(--gold);letter-spacing:.5px}
+.slot .cap span{display:block;font-size:11px;color:#9c8467;margin-top:3px;line-height:1.5}
+
+/* ============================================================
+   PHONE FRAME  (9:16 — 360 x 640)
+   ============================================================ */
+.phone{
+  width:100%;max-width:340px;aspect-ratio:9/16;margin:0 auto;position:relative;
+  background:#000;border-radius:30px;padding:9px;
+  box-shadow:0 0 0 2px #6b4a2e, 0 24px 50px rgba(0,0,0,.6), 0 0 70px rgba(200,53,44,.12);
+}
+.screen{
+  position:relative;width:100%;height:100%;border-radius:22px;overflow:hidden;
+  background:var(--tent);display:flex;flex-direction:column;
+  font-size:12px;
+}
+.notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:90px;height:16px;background:#000;border-radius:0 0 12px 12px;z-index:90;
+}
+.statusbar{
+  height:22px;flex:0 0 22px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;font-size:9px;color:var(--parchment-2);z-index:80;position:relative;
+  font-weight:600;letter-spacing:.3px;
+}
+
+/* ============================================================
+   SHARED SURFACE PATTERNS — tent, wood, bulbs
+   ============================================================ */
+.tent-stripes{
+  background:repeating-linear-gradient(115deg,
+    var(--red) 0 22px, #A82920 22px 44px);
+}
+.tent-top{  /* festoon tent valance */
+  height:16px;flex:0 0 16px;position:relative;
+  background:repeating-linear-gradient(90deg, var(--red) 0 14px, var(--cream) 14px 28px);
+  box-shadow:0 2px 6px rgba(0,0,0,.5);
+}
+.tent-top::after{
+  content:"";position:absolute;left:0;right:0;bottom:-7px;height:8px;
+  background:radial-gradient(circle at 7px 0, transparent 7px, var(--red) 7px) repeat-x;
+  background-size:14px 8px;
+}
+.woodwall{
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 13px),
+    linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%);
+}
+.bulbs{  /* bulb string */
+  display:flex;justify-content:space-around;align-items:center;
+  padding:3px 8px;
+}
+.bulb{
+  width:6px;height:6px;border-radius:50%;background:var(--bulb);
+  box-shadow:0 0 6px 2px rgba(255,233,168,.75);
+  animation:blink 1.6s infinite;
+}
+.bulb:nth-child(2n){animation-delay:.4s}
+.bulb:nth-child(3n){animation-delay:.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  min-height:var(--touch);width:100%;
+  font-family:var(--f-marquee);font-size:14px;letter-spacing:.6px;
+  border:none;border-radius:var(--r-md);cursor:pointer;
+  color:var(--cream);text-transform:uppercase;
+  transition:transform .08s, filter .15s;
+  position:relative;
+}
+.btn:active{transform:translateY(2px)}
+.btn-primary{background:linear-gradient(180deg,#E04539,var(--red-dark));box-shadow:0 4px 0 #6d160f, inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:var(--ink);box-shadow:0 4px 0 #8a5c0c, inset 0 1px 0 rgba(255,255,255,.4)}
+.btn-teal{background:linear-gradient(180deg,#3AA595,var(--teal-dark));box-shadow:0 4px 0 #12403a, inset 0 1px 0 rgba(255,255,255,.2)}
+.btn-ghost{background:transparent;border:2px solid var(--parchment-2);color:var(--parchment);box-shadow:none}
+.btn-sm{min-height:34px;font-size:11px;border-radius:var(--r-sm)}
+
+.card{
+  background:linear-gradient(180deg, var(--cream), var(--parchment));
+  color:var(--ink);border-radius:var(--r-lg);
+  border:3px solid var(--wood);
+  box-shadow:0 6px 0 rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.4);
+  padding:var(--s4);
+}
+.marquee-title{
+  font-family:var(--f-display);color:var(--gold);text-align:center;
+  text-shadow:0 2px 0 var(--red-dark), 0 0 14px rgba(245,185,66,.5);
+  line-height:1.1;
+}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(245,185,66,.4);
+  color:var(--gold);border-radius:var(--r-pill);
+  padding:3px 9px;font-size:9px;font-weight:700;letter-spacing:.3px;
+}
+.stack{display:flex;flex-direction:column;gap:var(--s3)}
+.row{display:flex;align-items:center;gap:var(--s2)}
+.grow{flex:1}
+.center{flex:1;display:flex;flex-direction:column;justify-content:center}
+.pad{padding:var(--s4)}
+.muted{color:#7a6247;font-size:10px;line-height:1.5}
+.tiny{font-size:9px}
+
+/* ============================================================
+   1) SPLASH
+   ============================================================ */
+.splash{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:radial-gradient(circle at 50% 40%, #4a2119 0%, var(--night) 75%);
+  position:relative;overflow:hidden;
+}
+.spotlight{
+  position:absolute;inset:0;
+  background:conic-gradient(from 200deg at 50% 30%,
+    transparent 0deg, rgba(255,233,168,.10) 20deg, transparent 40deg,
+    transparent 90deg, rgba(255,233,168,.08) 110deg, transparent 130deg);
+}
+.logo-badge{
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #F7D07A, var(--gold-deep));
+  border:5px solid var(--cream);
+  box-shadow:0 0 0 5px var(--red), 0 0 45px rgba(245,185,66,.6);
+  display:flex;align-items:center;justify-content:center;font-size:52px;
+  position:relative;z-index:2;
+}
+.loadbar{
+  width:150px;height:8px;border-radius:var(--r-pill);
+  background:rgba(0,0,0,.5);overflow:hidden;border:1px solid #6b4a2e;z-index:2;
+}
+.loadbar i{display:block;height:100%;width:62%;background:linear-gradient(90deg,var(--gold),var(--bulb));animation:load 2.2s ease-in-out infinite}
+@keyframes load{0%{width:12%}50%{width:88%}100%{width:12%}}
+
+/* ============================================================
+   2) GAME SCREEN — Race (top) + Scoring board (bottom)
+   ============================================================ */
+.hud{
+  flex:0 0 auto;padding:6px 10px;background:linear-gradient(180deg,rgba(0,0,0,.65),transparent);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:40;
+}
+.hud-btn{
+  width:30px;height:30px;border-radius:50%;border:2px solid var(--gold-deep);
+  background:rgba(0,0,0,.5);color:var(--gold);display:flex;align-items:center;justify-content:center;
+  font-size:13px;cursor:pointer;flex:0 0 30px;
+}
+.hud-meter{flex:1}
+.hud-meter .lbl{display:flex;justify-content:space-between;font-size:8px;color:var(--parchment-2);font-weight:700;margin-bottom:2px;letter-spacing:.4px}
+.progress{height:9px;border-radius:var(--r-pill);background:rgba(0,0,0,.55);border:1px solid #6b4a2e;overflow:hidden;position:relative}
+.progress i{display:block;height:100%;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--teal),#5FD3BE)}
+.progress.ai i{background:linear-gradient(90deg,var(--red-dark),#E0574A)}
+
+.race{
+  flex:0 0 40%;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#3E6E8C 0%, #6FA3B8 45%, #C9A96B 46%, #A8814B 100%);
+}
+.race .crowd{
+  position:absolute;top:0;left:0;right:0;height:22%;
+  background:repeating-linear-gradient(90deg,#2b2140 0 5px,#3a2b52 5px 10px,#4a2f45 10px 15px);
+  opacity:.85;
+}
+.race .banner{
+  position:absolute;top:18%;left:0;right:0;height:9px;
+  background:repeating-linear-gradient(90deg,var(--red) 0 10px, var(--cream) 10px 20px);
+  border-top:1px solid rgba(0,0,0,.4);border-bottom:1px solid rgba(0,0,0,.4);
+}
+.lanes{position:absolute;top:26%;left:0;right:0;bottom:0;display:flex;flex-direction:column}
+.lane{
+  flex:1;position:relative;border-bottom:1px dashed rgba(255,255,255,.25);
+  display:flex;align-items:center;
+}
+.lane:last-child{border-bottom:none}
+.lane .no{
+  position:absolute;left:3px;width:13px;height:13px;border-radius:50%;
+  background:rgba(0,0,0,.5);color:var(--cream);font-size:7px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.3);
+}
+.horse{
+  position:absolute;font-size:17px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));
+  transition:left .6s cubic-bezier(.34,1.2,.64,1);
+}
+.horse.me::after{
+  content:"";position:absolute;left:50%;top:-7px;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--teal);
+}
+.finish{
+  position:absolute;right:8px;top:26%;bottom:0;width:8px;
+  background:repeating-conic-gradient(#fff 0 25%, #111 0 50%) 0 0/8px 8px;
+  border-left:1px solid rgba(0,0,0,.5);
+}
+
+/* Scoring board */
+.board{
+  flex:1;position:relative;display:flex;flex-direction:column;
+  padding:8px 10px 0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(245,185,66,.12), transparent 55%),
+    linear-gradient(180deg,#12332B 0%, #0C231D 100%);
+  border-top:3px solid var(--gold-deep);
+  overflow:hidden;
+}
+.holes{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;padding:4px 0}
+.hole-row{display:flex;gap:12px;align-items:center;justify-content:center}
+.hole{
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-marquee);color:#fff;font-size:11px;
+  box-shadow:inset 0 5px 10px rgba(0,0,0,.75), 0 0 0 3px rgba(0,0,0,.35), 0 0 14px rgba(0,0,0,.4);
+  border:2px solid rgba(255,255,255,.28);
+  position:relative;
+}
+.hole.r{width:30px;height:30px;background:radial-gradient(circle at 50% 120%, #7d1c15, var(--red))}
+.hole.y{width:40px;height:40px;background:radial-gradient(circle at 50% 120%, #9c7412, var(--gold));color:var(--ink)}
+.hole.g{width:50px;height:50px;background:radial-gradient(circle at 50% 120%, #1f5c2b, var(--green))}
+.hole .pts{position:absolute;bottom:-13px;font-family:var(--f-body);font-size:8px;font-weight:900;color:var(--parchment-2)}
+.hole.hit{animation:pop .5s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.22);box-shadow:0 0 22px 8px var(--bulb)}100%{transform:scale(1)}}
+
+.throwzone{
+  flex:0 0 66px;border-top:2px dashed rgba(245,185,66,.35);
+  display:flex;align-items:center;justify-content:center;gap:10px;position:relative;
+}
+.ball{
+  width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%, #fff, var(--red) 70%);
+  box-shadow:0 3px 6px rgba(0,0,0,.6);
+}
+.ball.spent{background:radial-gradient(circle at 32% 28%,#6b6b6b,#333);opacity:.45}
+.swipe-hint{
+  position:absolute;bottom:5px;font-size:8px;color:var(--parchment-2);letter-spacing:.4px;
+  display:flex;align-items:center;gap:4px;
+}
+.arc{
+  position:absolute;left:50%;bottom:56px;width:2px;height:78px;
+  background:linear-gradient(180deg,transparent,rgba(255,233,168,.7));
+  transform:translateX(-50%) rotate(-9deg);transform-origin:bottom center;
+  border-radius:2px;opacity:.85;
+}
+.toast{
+  position:absolute;top:16%;left:50%;transform:translateX(-50%);
+  font-family:var(--f-display);font-size:22px;color:var(--gold);
+  text-shadow:0 2px 0 var(--red-dark), 0 0 18px rgba(245,185,66,.7);
+  pointer-events:none;animation:rise 1.6s ease-out infinite;
+}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}25%{opacity:1;transform:translate(-50%,0) scale(1.1)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-22px) scale(1)}}
+
+/* ============================================================
+   OVERLAY (pause / results)
+   ============================================================ */
+.overlay{
+  position:absolute;inset:0;z-index:70;
+  background:rgba(10,6,5,.82);backdrop-filter:blur(3px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;gap:12px;
+}
+.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.confetti i{
+  position:absolute;width:5px;height:9px;opacity:.9;
+  animation:fall 3s linear infinite;
+}
+@keyframes fall{0%{transform:translateY(-30px) rotate(0)}100%{transform:translateY(640px) rotate(540deg)}}
+
+/* Level map */
+.levelmap{flex:1;overflow:hidden;position:relative;padding:10px 14px}
+.node{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-marquee);font-size:13px;border:3px solid;position:relative;
+}
+.node.done{background:var(--green);border-color:#8FD79C;color:#fff}
+.node.now{background:var(--gold);border-color:var(--bulb);color:var(--ink);box-shadow:0 0 20px rgba(245,185,66,.8);animation:pulse 1.6s infinite}
+.node.lock{background:#3b2a20;border-color:#5c4433;color:#7a6247}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+.path-line{flex:1;height:3px;background:repeating-linear-gradient(90deg,var(--parchment-2) 0 5px, transparent 5px 10px)}
+
+/* Toggle */
+.toggle{width:38px;height:22px;border-radius:var(--r-pill);background:#8a7250;position:relative;flex:0 0 38px;cursor:pointer}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--cream);transition:.2s}
+.toggle.on{background:var(--teal)}
+.toggle.on::after{left:18px}
+.setting{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(74,44,26,.2)}
+.setting:last-child{border-bottom:none}
+.setting b{font-size:11px;display:block}
+.setting span{font-size:9px;color:#7a6247}
+
+/* Segmented control */
+.seg{display:flex;background:rgba(0,0,0,.3);border-radius:var(--r-pill);padding:3px;gap:3px;border:1px solid #6b4a2e}
+.seg button{
+  flex:1;min-height:32px;border:none;border-radius:var(--r-pill);cursor:pointer;
+  background:transparent;color:var(--parchment-2);font-family:var(--f-body);font-weight:700;font-size:10px;
+}
+.seg button.on{background:var(--gold);color:var(--ink)}
+
+/* Horse picker cards */
+.horsepick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hcard{
+  aspect-ratio:1;border-radius:var(--r-md);border:2px solid #6b4a2e;
+  background:linear-gradient(180deg,#4A2C1A,#2F1B10);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:22px;cursor:pointer;position:relative;
+}
+.hcard small{font-size:8px;color:var(--parchment-2);font-family:var(--f-body);font-weight:700}
+.hcard.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,185,66,.35), 0 0 18px rgba(245,185,66,.3)}
+.hcard.on::after{content:"✓";position:absolute;top:3px;right:5px;font-size:10px;color:var(--gold)}
+
+/* Ad slot */
+.adslot{
+  height:40px;flex:0 0 40px;background:repeating-linear-gradient(45deg,#241a14 0 8px,#2c211a 8px 16px);
+  border-top:1px solid #4a3527;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#7a6247;letter-spacing:1px;font-weight:700;
+}
+
+/* ============================================================
+   FLOW MAP VIEW
+   ============================================================ */
+.flowwrap{background:#1d120e;border:2px solid #4a2c1a;border-radius:18px;padding:26px;overflow-x:auto}
+.flow-col{display:flex;flex-direction:column;gap:10px;min-width:170px}
+.flow{display:flex;gap:26px;align-items:flex-start;min-width:900px}
+.fnode{
+  background:linear-gradient(180deg,var(--cream),var(--parchment));color:var(--ink);
+  border:2px solid var(--wood);border-radius:10px;padding:9px 11px;font-size:11px;font-weight:700;
+  box-shadow:0 3px 0 rgba(0,0,0,.35);
+}
+.fnode small{display:block;font-weight:400;font-size:9px;color:#7a6247;margin-top:3px;line-height:1.45}
+.fnode.entry{background:linear-gradient(180deg,var(--gold),var(--gold-deep))}
+.fnode.entry small{color:#5c3d08}
+.fnode.core{background:linear-gradient(180deg,#3AA595,var(--teal-dark));color:var(--cream);border-color:#12403a}
+.fnode.core small{color:#bfe6df}
+.fnode.ad{background:linear-gradient(180deg,#E04539,var(--red-dark));color:var(--cream);border-color:#6d160f}
+.fnode.ad small{color:#f2c4bf}
+.flow-col > h4{font-family:var(--f-marquee);font-size:11px;color:var(--gold);letter-spacing:.5px;margin-bottom:2px}
+.arrow{align-self:center;color:var(--gold);font-size:20px;padding-top:30px}
+
+/* Design system view */
+.ds{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.ds section{background:#1d120e;border:2px solid #4a2c1a;border-radius:16px;padding:18px}
+.ds h3{font-family:var(--f-marquee);font-size:13px;color:var(--gold);margin-bottom:12px;letter-spacing:.5px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px}
+.sw{border-radius:8px;height:54px;display:flex;flex-direction:column;justify-content:flex-end;padding:5px;font-size:8px;font-weight:700;border:1px solid rgba(255,255,255,.15)}
+.sw code{font-size:7px;opacity:.8;display:block}
+.ds ul{list-style:none;font-size:11px;line-height:1.85;color:var(--parchment)}
+.ds ul li::before{content:"▸ ";color:var(--gold)}
+.ds table{width:100%;font-size:10px;border-collapse:collapse;color:var(--parchment)}
+.ds td{padding:5px 0;border-bottom:1px solid #3a2419}
+.ds td:last-child{text-align:right;color:#9c8467}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="masthead">
+  <h1>FINAL LAP · FINAL RACE</h1>
+  <p>UI/UX Prototype · Retro Carnival direction · 1080×1920 portrait · built for Godot 4</p>
+</div>
+
+<div class="tabs">
+  <button class="tab on" data-v="screens">📱 Screens</button>
+  <button class="tab" data-v="flow">🗺️ UX Flow</button>
+  <button class="tab" data-v="ds">🎨 Design System</button>
+</div>
+
+<!-- ============================================================
+     VIEW 1 — SCREENS
+     ============================================================ -->
+<div class="view on" id="v-screens">
+<div class="grid">
+
+  <!-- ---------- 01 SPLASH ---------- -->
+  <div class="slot">
+    <div class="cap"><b>01 · SPLASH</b><span>Brand moment + quiet loading. The anonymous ID is minted here.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="splash">
+        <div class="spotlight"></div>
+        <div class="logo-badge">🐎</div>
+        <div class="marquee-title" style="font-size:22px;z-index:2">FINAL LAP<br><span style="font-size:15px;color:var(--cream)">FINAL RACE</span></div>
+        <div class="loadbar"><i></i></div>
+        <div class="tiny" style="color:#7a6247;z-index:2">Saddling up…</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 02 MAIN MENU ---------- -->
+  <div class="slot">
+    <div class="cap"><b>02 · MAIN MENU</b><span>One dominant CTA: CONTINUE. For a new player it reads PLAY.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="tent-top"></div>
+      <div class="woodwall" style="flex:1;display:flex;flex-direction:column;padding:16px 18px 10px">
+        <div class="bulbs" style="margin-bottom:6px">
+          <i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i>
+        </div>
+        <div class="marquee-title" style="font-size:26px;margin-bottom:2px">FINAL LAP</div>
+        <div class="marquee-title" style="font-size:15px;color:var(--cream);margin-bottom:14px">FINAL RACE</div>
+
+        <div class="row" style="justify-content:center;margin-bottom:14px">
+          <span class="chip">🏅 Level 7</span>
+          <span class="chip">🎟️ 12 tickets</span>
+          <span class="chip">🔥 3-day streak</span>
+        </div>
+
+        <div class="stack grow" style="justify-content:center">
+          <button class="btn btn-gold" style="min-height:52px;font-size:16px">▶ CONTINUE</button>
+          <button class="btn btn-primary">🎯 LEVEL SELECT</button>
+          <div class="row">
+            <button class="btn btn-teal btn-sm">⚡ QUICK RACE</button>
+            <button class="btn btn-ghost btn-sm">🏆 STATS</button>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:space-between;padding-top:10px">
+          <button class="hud-btn">⚙</button>
+          <button class="hud-btn">🔊</button>
+          <button class="hud-btn">👤</button>
+          <button class="hud-btn">ℹ</button>
+        </div>
+      </div>
+      <div class="adslot">— BANNER AD 320×50 —</div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 03 CONSENT ---------- -->
+  <div class="slot">
+    <div class="cap"><b>03 · CONSENT (GDPR/ATT)</b><span>First launch only, BEFORE gameplay. ATT + UMP in one flow.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="woodwall" style="flex:1;display:flex;flex-direction:column;padding:16px 16px 14px;justify-content:center;gap:12px">
+        <div style="text-align:center;font-size:38px">🎪</div>
+        <div class="marquee-title" style="font-size:17px">YOUR PRIVACY MATTERS</div>
+        <div class="card">
+          <div class="stack" style="gap:10px">
+            <div class="row" style="align-items:flex-start;gap:8px">
+              <span style="font-size:15px">📊</span>
+              <div><b style="font-size:11px">Analytics</b><div class="muted">Helps us see which levels feel too hard — never identifies you.</div></div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="row" style="align-items:flex-start;gap:8px">
+              <span style="font-size:15px">🎯</span>
+              <div><b style="font-size:11px">Personalised ads</b><div class="muted">Turn this off and you still see ads — just less relevant ones.</div></div>
+              <div class="toggle"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-gold">ACCEPT ALL</button>
+        <button class="btn btn-ghost btn-sm">SAVE MY CHOICES</button>
+        <div class="tiny" style="text-align:center;color:#7a6247;line-height:1.6">
+          You can change this any time in Settings → Privacy.<br>
+          <u>Privacy Policy</u> · <u>Terms of Use</u>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 04 SIGN IN ---------- -->
+  <div class="slot">
+    <div class="cap"><b>04 · SIGN IN</b><span>Never required — "Not now" is always visible. The point is backing up progress.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="woodwall" style="flex:1;display:flex;flex-direction:column;padding:16px;justify-content:center;gap:14px">
+        <div style="text-align:center;font-size:40px">🎠</div>
+        <div class="marquee-title" style="font-size:18px">DON'T LOSE YOUR RUN</div>
+        <div class="tiny" style="text-align:center;color:var(--parchment-2);line-height:1.7;padding:0 10px">
+          You're on level 7. Sign in and your stable follows you to any new phone.
+        </div>
+        <div class="stack" style="margin-top:4px">
+          <button class="btn" style="background:#fff;color:#1f1f1f;box-shadow:0 4px 0 #b9b9b9">Continue with Google</button>
+          <button class="btn" style="background:#000;color:#fff;box-shadow:0 4px 0 #333;border:1px solid #444"> Continue with Apple</button>
+        </div>
+        <div class="row"><div class="grow" style="height:1px;background:#6b4a2e"></div><span class="tiny" style="color:#7a6247">or</span><div class="grow" style="height:1px;background:#6b4a2e"></div></div>
+        <button class="btn btn-ghost btn-sm">NOT NOW</button>
+        <div class="tiny" style="text-align:center;color:#7a6247">Guest progress lives only on this device.</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 05 LEVEL MAP ---------- -->
+  <div class="slot">
+    <div class="cap"><b>05 · LEVEL MAP</b><span>Midway-path metaphor. Difficulty is derived from the level — no separate picker.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="hud" style="background:var(--tent-2)">
+        <button class="hud-btn">‹</button>
+        <div class="marquee-title" style="font-size:13px;flex:1">THE MIDWAY</div>
+        <span class="chip">7 / 30</span>
+      </div>
+      <div class="levelmap woodwall">
+        <div class="stack" style="gap:0">
+          <div class="row" style="justify-content:space-between;padding:6px 0">
+            <div class="node done">1</div><div class="path-line"></div>
+            <div class="node done">2</div><div class="path-line"></div>
+            <div class="node done">3</div>
+          </div>
+          <div class="row" style="justify-content:flex-end"><div style="width:3px;height:16px;background:var(--parchment-2);margin-right:18px"></div></div>
+          <div class="row" style="justify-content:space-between;padding:6px 0;flex-direction:row-reverse">
+            <div class="node done">4</div><div class="path-line"></div>
+            <div class="node done">5</div><div class="path-line"></div>
+            <div class="node done">6</div>
+          </div>
+          <div class="row"><div style="width:3px;height:16px;background:var(--parchment-2);margin-left:18px"></div></div>
+          <div class="row" style="justify-content:space-between;padding:6px 0">
+            <div class="node now">7</div><div class="path-line"></div>
+            <div class="node lock">8</div><div class="path-line"></div>
+            <div class="node lock">9</div>
+          </div>
+          <div class="row" style="justify-content:flex-end"><div style="width:3px;height:16px;background:#5c4433;margin-right:18px"></div></div>
+          <div class="row" style="justify-content:space-between;padding:6px 0;flex-direction:row-reverse">
+            <div class="node lock">10</div><div class="path-line" style="background:repeating-linear-gradient(90deg,#5c4433 0 5px,transparent 5px 10px)"></div>
+            <div class="node lock" style="background:#4a3020;border-color:var(--gold-deep);color:var(--gold)">👑</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px;padding:11px">
+          <div class="row"><b style="font-size:12px">Level 7 — Evening Show</b><span class="grow"></span><span style="font-size:9px;font-weight:700;color:var(--red)">MEDIUM</span></div>
+          <div class="muted" style="margin-top:4px">Rival horses aim faster here. Target: 24 points.</div>
+          <div class="row" style="margin-top:8px;gap:6px">
+            <button class="btn btn-gold btn-sm">▶ START</button>
+            <button class="btn btn-ghost btn-sm" style="max-width:52px">🐎</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 06 RACE SETUP ---------- -->
+  <div class="slot">
+    <div class="cap"><b>06 · RACE SETUP</b><span>Horse pick + rival preview. In Quick Race, difficulty is chosen manually.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="hud" style="background:var(--tent-2)">
+        <button class="hud-btn">‹</button>
+        <div class="marquee-title" style="font-size:13px;flex:1">PICK YOUR HORSE</div>
+        <div style="width:30px"></div>
+      </div>
+      <div class="woodwall" style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:11px">
+        <div class="horsepick">
+          <div class="hcard on">🐎<small>BOLT</small></div>
+          <div class="hcard">🐴<small>SMOKE</small></div>
+          <div class="hcard">🏇<small>EMBER</small></div>
+          <div class="hcard">🐎<small>FROST</small></div>
+          <div class="hcard">🐴<small>SOVEREIGN</small></div>
+          <div class="hcard" style="opacity:.45">🔒<small>LVL 12</small></div>
+        </div>
+
+        <div>
+          <div class="tiny" style="color:var(--parchment-2);font-weight:700;margin-bottom:5px;letter-spacing:.5px">DIFFICULTY</div>
+          <div class="seg">
+            <button>EASY</button><button class="on">MEDIUM</button><button>HARD</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:11px">
+          <div class="tiny" style="font-weight:900;letter-spacing:.5px;margin-bottom:6px">THIS RACE</div>
+          <div class="row" style="justify-content:space-between"><span style="font-size:11px">🎯 Target score</span><b style="font-size:11px">24</b></div>
+          <div class="row" style="justify-content:space-between"><span style="font-size:11px">⚪ Balls</span><b style="font-size:11px">15</b></div>
+          <div class="row" style="justify-content:space-between"><span style="font-size:11px">🐎 Rivals</span><b style="font-size:11px">4 horses</b></div>
+        </div>
+
+        <div class="grow"></div>
+        <button class="btn btn-gold" style="min-height:50px;font-size:16px">🏁 START RACE</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 07 GAMEPLAY ---------- -->
+  <div class="slot">
+    <div class="cap"><b>07 · GAMEPLAY (CORE SCREEN)</b><span>Top 40% race, bottom 60% scoring board. The thumb zone is the throw zone.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+
+      <div class="hud">
+        <button class="hud-btn">⏸</button>
+        <div class="hud-meter">
+          <div class="lbl"><span>🐎 YOU</span><span>18 / 24</span></div>
+          <div class="progress"><i style="width:75%"></i></div>
+          <div class="lbl" style="margin-top:3px"><span>🤖 LEAD RIVAL</span><span>15 / 24</span></div>
+          <div class="progress ai"><i style="width:62%"></i></div>
+        </div>
+        <div style="text-align:center;flex:0 0 34px">
+          <div class="chip" style="padding:2px 6px">⚪ 6</div>
+        </div>
+      </div>
+
+      <div class="race">
+        <div class="crowd"></div>
+        <div class="banner"></div>
+        <div class="finish"></div>
+        <div class="lanes">
+          <div class="lane"><span class="no">1</span><span class="horse" style="left:58%">🐎</span></div>
+          <div class="lane"><span class="no">2</span><span class="horse me" style="left:74%">🏇</span></div>
+          <div class="lane"><span class="no">3</span><span class="horse" style="left:48%">🐴</span></div>
+          <div class="lane"><span class="no">4</span><span class="horse" style="left:63%">🐎</span></div>
+          <div class="lane"><span class="no">5</span><span class="horse" style="left:35%">🐴</span></div>
+        </div>
+      </div>
+
+      <div class="board">
+        <div class="toast">+6!</div>
+        <div class="holes">
+          <div class="hole-row"><div class="hole r hit">6<span class="pts">6 PTS</span></div></div>
+          <div class="hole-row">
+            <div class="hole y">3<span class="pts">3 PTS</span></div>
+            <div class="hole y">3<span class="pts">3 PTS</span></div>
+          </div>
+          <div class="hole-row">
+            <div class="hole g">2<span class="pts">2</span></div>
+            <div class="hole g">2<span class="pts">2</span></div>
+            <div class="hole g">2<span class="pts">2</span></div>
+          </div>
+        </div>
+        <div class="arc"></div>
+        <div class="throwzone">
+          <div class="ball spent"></div><div class="ball spent"></div>
+          <div class="ball" style="transform:scale(1.15)"></div>
+          <div class="ball"></div><div class="ball"></div>
+          <div class="swipe-hint">👆 SWIPE UP — power &amp; angle</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 08 ONBOARDING ---------- -->
+  <div class="slot">
+    <div class="cap"><b>08 · FIRST-RUN COACHING</b><span>No wall of text — teach with motion. Lives inside level 1, game held still.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="hud">
+        <button class="hud-btn" style="opacity:.3">⏸</button>
+        <div class="hud-meter" style="opacity:.3">
+          <div class="lbl"><span>🐎 YOU</span><span>0 / 24</span></div>
+          <div class="progress"><i style="width:0%"></i></div>
+        </div>
+      </div>
+      <div class="race" style="opacity:.35">
+        <div class="crowd"></div><div class="banner"></div><div class="finish"></div>
+        <div class="lanes">
+          <div class="lane"><span class="horse" style="left:6%">🐎</span></div>
+          <div class="lane"><span class="horse me" style="left:6%">🏇</span></div>
+          <div class="lane"><span class="horse" style="left:6%">🐴</span></div>
+          <div class="lane"><span class="horse" style="left:6%">🐎</span></div>
+          <div class="lane"><span class="horse" style="left:6%">🐴</span></div>
+        </div>
+      </div>
+      <div class="board">
+        <div class="holes">
+          <div class="hole-row"><div class="hole r" style="box-shadow:0 0 0 4px var(--bulb),0 0 26px 8px rgba(255,233,168,.6);animation:pulse 1.4s infinite">6</div></div>
+          <div class="hole-row" style="opacity:.3"><div class="hole y">3</div><div class="hole y">3</div></div>
+          <div class="hole-row" style="opacity:.3"><div class="hole g">2</div><div class="hole g">2</div><div class="hole g">2</div></div>
+        </div>
+        <div class="arc" style="opacity:1;box-shadow:0 0 12px var(--bulb)"></div>
+        <div class="throwzone" style="flex:0 0 84px">
+          <div class="ball" style="transform:scale(1.3);box-shadow:0 0 0 3px var(--bulb),0 0 20px var(--bulb)"></div>
+        </div>
+      </div>
+      <div class="overlay" style="background:rgba(10,6,5,.45);justify-content:flex-end;padding-bottom:120px">
+        <div style="font-size:34px;animation:rise 2s infinite">👆</div>
+        <div class="card" style="padding:10px 14px;text-align:center">
+          <b style="font-size:12px">The red hole is worth 6.</b>
+          <div class="muted" style="margin-top:3px">Small target, big reward. Swipe the ball upward.</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 09 PAUSE ---------- -->
+  <div class="slot">
+    <div class="cap"><b>09 · PAUSE</b><span>Audio and haptics right here — no trip to Settings. Quit asks for confirmation.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="hud" style="opacity:.4"><button class="hud-btn">⏸</button><div class="hud-meter"><div class="progress"><i style="width:75%"></i></div></div></div>
+      <div class="race" style="filter:blur(2px) brightness(.5)">
+        <div class="crowd"></div><div class="banner"></div>
+        <div class="lanes"><div class="lane"><span class="horse" style="left:58%">🐎</span></div><div class="lane"><span class="horse" style="left:74%">🏇</span></div><div class="lane"><span class="horse" style="left:48%">🐴</span></div><div class="lane"><span class="horse" style="left:63%">🐎</span></div><div class="lane"><span class="horse" style="left:35%">🐴</span></div></div>
+      </div>
+      <div class="board" style="filter:blur(2px) brightness(.5)">
+        <div class="holes"><div class="hole-row"><div class="hole r">6</div></div><div class="hole-row"><div class="hole y">3</div><div class="hole y">3</div></div><div class="hole-row"><div class="hole g">2</div><div class="hole g">2</div><div class="hole g">2</div></div></div>
+      </div>
+      <div class="overlay">
+        <div class="marquee-title" style="font-size:24px">PAUSED</div>
+        <div class="card" style="width:100%;padding:12px 14px">
+          <div class="setting"><span style="font-size:15px">🔊</span><div class="grow"><b>Sound effects</b></div><div class="toggle on"></div></div>
+          <div class="setting"><span style="font-size:15px">🎵</span><div class="grow"><b>Music</b></div><div class="toggle on"></div></div>
+          <div class="setting"><span style="font-size:15px">📳</span><div class="grow"><b>Haptics</b></div><div class="toggle"></div></div>
+        </div>
+        <div class="stack" style="width:100%">
+          <button class="btn btn-gold">▶ CONTINUE</button>
+          <div class="row">
+            <button class="btn btn-ghost btn-sm">↻ RESTART</button>
+            <button class="btn btn-ghost btn-sm">⨯ QUIT</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 10 VICTORY ---------- -->
+  <div class="slot">
+    <div class="cap"><b>10 · VICTORY</b><span>No ad until the reward animation lands. The interstitial fires after CONTINUE.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="race" style="flex:0 0 40%;filter:brightness(.6)">
+        <div class="crowd"></div><div class="banner"></div><div class="finish"></div>
+        <div class="lanes"><div class="lane"><span class="horse" style="left:70%">🐎</span></div><div class="lane"><span class="horse me" style="left:88%">🏇</span></div><div class="lane"><span class="horse" style="left:60%">🐴</span></div><div class="lane"><span class="horse" style="left:72%">🐎</span></div><div class="lane"><span class="horse" style="left:44%">🐴</span></div></div>
+      </div>
+      <div class="board" style="filter:brightness(.6)"><div class="holes"><div class="hole-row"><div class="hole r">6</div></div><div class="hole-row"><div class="hole y">3</div><div class="hole y">3</div></div><div class="hole-row"><div class="hole g">2</div><div class="hole g">2</div><div class="hole g">2</div></div></div></div>
+      <div class="overlay">
+        <div class="confetti">
+          <i style="left:8%;background:var(--gold);animation-delay:0s"></i>
+          <i style="left:22%;background:var(--red);animation-delay:.5s"></i>
+          <i style="left:38%;background:var(--teal);animation-delay:1.1s"></i>
+          <i style="left:55%;background:var(--cream);animation-delay:.3s"></i>
+          <i style="left:71%;background:var(--gold);animation-delay:1.6s"></i>
+          <i style="left:88%;background:var(--green);animation-delay:.8s"></i>
+        </div>
+        <div style="font-size:44px">🏆</div>
+        <div class="marquee-title" style="font-size:26px">FIRST PLACE!</div>
+        <div class="row" style="justify-content:center;gap:5px">
+          <span style="font-size:19px;color:var(--gold)">★</span><span style="font-size:19px;color:var(--gold)">★</span><span style="font-size:19px;color:#5c4433">★</span>
+        </div>
+        <div class="card" style="width:100%;padding:11px">
+          <div class="row" style="justify-content:space-between;font-size:11px"><span>Total score</span><b>26</b></div>
+          <div class="row" style="justify-content:space-between;font-size:11px"><span>Red hits</span><b>3 ×6</b></div>
+          <div class="row" style="justify-content:space-between;font-size:11px"><span>Accuracy</span><b>73%</b></div>
+          <div class="row" style="justify-content:space-between;font-size:11px;color:var(--green-dark)"><b>🎟️ Tickets earned</b><b>+3</b></div>
+        </div>
+        <div class="stack" style="width:100%">
+          <button class="btn btn-gold">▶ NEXT LEVEL</button>
+          <div class="row">
+            <button class="btn btn-teal btn-sm">📺 WATCH FOR 3RD STAR</button>
+            <button class="btn btn-ghost btn-sm" style="max-width:60px">🏠</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 11 DEFEAT ---------- -->
+  <div class="slot">
+    <div class="cap"><b>11 · DEFEAT</b><span>Tone is coaching, not blaming. Rewarded ad = "3 more balls", once per race.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="race" style="flex:0 0 40%;filter:brightness(.5) saturate(.5)">
+        <div class="crowd"></div><div class="banner"></div><div class="finish"></div>
+        <div class="lanes"><div class="lane"><span class="horse" style="left:88%">🐎</span></div><div class="lane"><span class="horse me" style="left:70%">🏇</span></div><div class="lane"><span class="horse" style="left:60%">🐴</span></div><div class="lane"><span class="horse" style="left:74%">🐎</span></div><div class="lane"><span class="horse" style="left:52%">🐴</span></div></div>
+      </div>
+      <div class="board" style="filter:brightness(.5) saturate(.5)"><div class="holes"><div class="hole-row"><div class="hole r">6</div></div><div class="hole-row"><div class="hole y">3</div><div class="hole y">3</div></div><div class="hole-row"><div class="hole g">2</div><div class="hole g">2</div><div class="hole g">2</div></div></div></div>
+      <div class="overlay">
+        <div style="font-size:40px">🎗️</div>
+        <div class="marquee-title" style="font-size:21px;color:var(--cream)">SO CLOSE</div>
+        <div class="tiny" style="color:var(--parchment-2);text-align:center">You finished 2nd — 3 points short.</div>
+        <div class="card" style="width:100%;padding:11px">
+          <div class="tiny" style="font-weight:900;margin-bottom:5px">YOU</div>
+          <div class="progress" style="height:11px"><i style="width:87%"></i></div>
+          <div class="tiny" style="font-weight:900;margin:7px 0 5px">WINNER</div>
+          <div class="progress ai" style="height:11px"><i style="width:100%"></i></div>
+          <div class="muted" style="margin-top:8px">💡 Green is easy but only 2. One red equals three greens.</div>
+        </div>
+        <div class="stack" style="width:100%">
+          <button class="btn btn-teal">📺 WATCH FOR 3 MORE BALLS</button>
+          <div class="row">
+            <button class="btn btn-gold btn-sm">↻ TRY AGAIN</button>
+            <button class="btn btn-ghost btn-sm" style="max-width:60px">🏠</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ---------- 12 SETTINGS ---------- -->
+  <div class="slot">
+    <div class="cap"><b>12 · SETTINGS</b><span>Privacy choices are reopenable here — GDPR requires a permanent path back.</span></div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ▲ 100%</span></div>
+      <div class="hud" style="background:var(--tent-2)">
+        <button class="hud-btn">‹</button>
+        <div class="marquee-title" style="font-size:13px;flex:1">SETTINGS</div>
+        <div style="width:30px"></div>
+      </div>
+      <div class="woodwall" style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden">
+        <div class="card" style="padding:10px 13px">
+          <div class="setting"><span style="font-size:15px">🔊</span><div class="grow"><b>Sound effects</b></div><div class="toggle on"></div></div>
+          <div class="setting"><span style="font-size:15px">🎵</span><div class="grow"><b>Music</b><span>Crowd noise and hoofbeat tempo</span></div><div class="toggle on"></div></div>
+          <div class="setting"><span style="font-size:15px">📳</span><div class="grow"><b>Haptics</b></div><div class="toggle"></div></div>
+        </div>
+        <div class="card" style="padding:10px 13px">
+          <div class="setting"><span style="font-size:15px">🌐</span><div class="grow"><b>Language</b></div><span style="font-size:10px;font-weight:700">English ›</span></div>
+          <div class="setting"><span style="font-size:15px">👤</span><div class="grow"><b>Account</b><span>Guest — not linked</span></div><span style="font-size:10px;font-weight:700;color:var(--red)">Link ›</span></div>
+          <div class="setting"><span style="font-size:15px">🛡️</span><div class="grow"><b>Privacy choices</b></div><span style="font-size:10px;font-weight:700">›</span></div>
+        </div>
+        <div class="card" style="padding:10px 13px">
+          <div class="setting"><span style="font-size:15px">💛</span><div class="grow"><b>Remove ads</b><span>One-time purchase</span></div><span style="font-size:10px;font-weight:900;color:var(--green-dark)">$3.99 ›</span></div>
+          <div class="setting"><span style="font-size:15px">↺</span><div class="grow"><b>Restore purchases</b></div><span style="font-size:10px;font-weight:700">›</span></div>
+        </div>
+        <div class="grow"></div>
+        <div class="tiny" style="text-align:center;color:#7a6247;line-height:1.7">
+          v1.0.0 (12) · <u>Support</u> · <u>Privacy</u><br>Made with 🐎 in Istanbul
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================================================
+     VIEW 2 — UX FLOW
+     ============================================================ -->
+<div class="view" id="v-flow">
+  <div class="flowwrap">
+    <div class="flow">
+
+      <div class="flow-col">
+        <h4>FIRST LAUNCH</h4>
+        <div class="fnode entry">01 Splash<small>Anonymous ID minted here. 2s target; assets load behind it.</small></div>
+        <div class="fnode">03 Consent<small>First launch only. ATT (iOS) + UMP in a single flow. Fully declinable — the game still works.</small></div>
+        <div class="fnode core">08 Coaching = Level 1<small>NO separate tutorial screen. Level 1 is the tutorial; it holds until the first ball flies.</small></div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-col">
+        <h4>HUB</h4>
+        <div class="fnode entry">02 Main Menu<small>Where every returning launch lands. One dominant CTA: CONTINUE → current level.</small></div>
+        <div class="fnode">05 Level Map<small>The midway path. Locked / cleared / active nodes. Difficulty derives from the level.</small></div>
+        <div class="fnode">06 Race Setup<small>Horse pick + target-score preview. Quick Race exposes difficulty manually.</small></div>
+        <div class="fnode">04 Sign In<small>Never mandatory. Prompted once after level 5, and always reachable from Settings.</small></div>
+        <div class="fnode">12 Settings<small>Audio, language, account, privacy, remove-ads purchase.</small></div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-col">
+        <h4>GAME LOOP</h4>
+        <div class="fnode core">07 Race<small>Top 40% track · bottom 60% board. Swipe → ball flies → hole → points → horse advances. One loop ≈ 1.5s.</small></div>
+        <div class="fnode">09 Pause<small>Audio and haptics live here. Quit confirms, so nobody rage-exits by accident.</small></div>
+        <div class="fnode ad">🚫 NO in-race ads<small>Not even a banner during a race. Break focus and the player loses, then blames the ad.</small></div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="flow-col">
+        <h4>RESULTS</h4>
+        <div class="fnode core">10 Victory<small>Confetti + stars + stats. "Next level" is the single dominant CTA.</small></div>
+        <div class="fnode core">11 Defeat<small>Coaching, not blaming: "3 points short" + a tip. The gap bar makes it concrete.</small></div>
+        <div class="fnode ad">📺 Rewarded ad<small>On defeat: "3 more balls" (once per race). On victory: the 3rd star. Both strictly optional.</small></div>
+        <div class="fnode ad">📺 Interstitial<small>Only when LEAVING a results screen. 1 per 3 races, 90s minimum gap. None at all in levels 1–5.</small></div>
+        <div class="fnode ad">📄 Banner<small>Menu, map and settings only. Hidden on race and results screens.</small></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ds" style="margin-top:24px">
+    <section>
+      <h3>KEY UX DECISIONS</h3>
+      <ul>
+        <li><b>Thumb law:</b> the bottom 35% of the screen belongs to the player alone. Never place a button, ad or toast there.</li>
+        <li><b>Two distinct scores:</b> "points" (earned from holes) and "distance" (horse position) must never look alike — points on the bar, distance on the track.</li>
+        <li><b>Rival visibility:</b> show only the lead rival in the HUD, not all four. The rest is noise.</li>
+        <li><b>The losing beat:</b> delay the defeat screen by 800ms so the player watches on the track why they lost.</li>
+        <li><b>Android back button:</b> defined on every screen — Pause during a race, exit confirmation in the menu.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>TABLET ADAPTATION</h3>
+      <ul>
+        <li>Portrait stays locked; at 4:3 the track and board keep their ratio and the sides fill with tent texture.</li>
+        <li>On tablet the throw zone isn't pinned to the bottom edge — it anchors to the last touch point, so one-handed play still reaches it.</li>
+        <li>Type doesn't scale unbounded: clamp it with <code>min(vw*0.06, 64px)</code> logic.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>ACCESSIBILITY</h3>
+      <ul>
+        <li>Holes are <b>never distinguished by colour alone</b>: size plus the printed number carry the same information. Critical for colour blindness.</li>
+        <li>Minimum touch target 44×44 pt; the holes are already 90/120/150 px on the 1080 canvas.</li>
+        <li>Text contrast: dark brown on cream = 11:1. Deep ink on gold = 8.5:1.</li>
+        <li>Respect the system "reduce motion" setting: confetti and screen shake switch off.</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+<!-- ============================================================
+     VIEW 3 — DESIGN SYSTEM
+     ============================================================ -->
+<div class="view" id="v-ds">
+  <div class="ds">
+
+    <section>
+      <h3>PALETTE — SURFACES</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#150F0E;color:#F8EDD6">Night<code>#150F0E</code></div>
+        <div class="sw" style="background:#2B1712;color:#F8EDD6">Tent<code>#2B1712</code></div>
+        <div class="sw" style="background:#4A2C1A;color:#F8EDD6">Wood<code>#4A2C1A</code></div>
+        <div class="sw" style="background:#F8EDD6;color:#22120A">Cream<code>#F8EDD6</code></div>
+        <div class="sw" style="background:#E9D5AC;color:#22120A">Parchment<code>#E9D5AC</code></div>
+        <div class="sw" style="background:#22120A;color:#F8EDD6">Ink<code>#22120A</code></div>
+      </div>
+      <h3 style="margin-top:16px">PALETTE — ACCENTS</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#C8352C;color:#fff">Carnival Red<code>#C8352C</code></div>
+        <div class="sw" style="background:#F5B942;color:#22120A">Marquee Gold<code>#F5B942</code></div>
+        <div class="sw" style="background:#FFE9A8;color:#22120A">Bulb<code>#FFE9A8</code></div>
+        <div class="sw" style="background:#2E8C7E;color:#fff">Player Teal<code>#2E8C7E</code></div>
+        <div class="sw" style="background:#46A055;color:#fff">Green<code>#46A055</code></div>
+      </div>
+      <ul style="margin-top:12px">
+        <li><b>Teal belongs to the player and nothing else.</b> Keep it out of every decorative element so it stays a pure "that one is me" signal.</li>
+        <li>Red does double duty: carnival identity and the 6-point hole. The hole's red separates itself with a 4 px cream ring.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>TYPOGRAPHY</h3>
+      <table>
+        <tr><td><b style="font-family:'Alfa Slab One'">Alfa Slab One</b> — Display</td><td>titles, win/lose</td></tr>
+        <tr><td><b style="font-family:'Bungee'">Bungee</b> — Marquee</td><td>buttons, HUD labels, scores</td></tr>
+        <tr><td><b style="font-family:'Rubik'">Rubik</b> — Body</td><td>body copy, settings, legal</td></tr>
+      </table>
+      <h3 style="margin-top:16px">SCALE (on the 1080×1920 canvas)</h3>
+      <table>
+        <tr><td>Display XL</td><td>96 px / Alfa Slab</td></tr>
+        <tr><td>Display</td><td>72 px / Alfa Slab</td></tr>
+        <tr><td>Heading</td><td>48 px / Bungee</td></tr>
+        <tr><td>Button</td><td>42 px / Bungee</td></tr>
+        <tr><td>Body</td><td>34 px / Rubik 500</td></tr>
+        <tr><td>Caption</td><td>28 px / Rubik 400</td></tr>
+        <tr><td>Legal</td><td>24 px / Rubik 400</td></tr>
+      </table>
+      <ul style="margin-top:10px">
+        <li>Ship English first, but import fonts with <b>Latin Extended-A</b> included — it costs almost nothing now and saves a re-export when you localise.</li>
+        <li>Bungee is uppercase-only by design. Never feed it a string that must display mixed case.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>MEASUREMENTS</h3>
+      <table>
+        <tr><td>Grid unit</td><td>4 px (prototype) / 12 px (canvas)</td></tr>
+        <tr><td>Screen margin</td><td>48 px (canvas)</td></tr>
+        <tr><td>Min touch target</td><td>132 px ≈ 44 pt</td></tr>
+        <tr><td>Button height</td><td>132 px / primary 156 px</td></tr>
+        <tr><td>Corner radius</td><td>24 / 42 / 66 px / pill</td></tr>
+        <tr><td>Card border</td><td>9 px wood + 6 px inner cream</td></tr>
+      </table>
+      <h3 style="margin-top:16px">HOLE GEOMETRY</h3>
+      <table>
+        <tr><td>🔴 Red ×1</td><td>90 px diameter · 6 pts</td></tr>
+        <tr><td>🟡 Yellow ×2</td><td>120 px diameter · 3 pts</td></tr>
+        <tr><td>🟢 Green ×3</td><td>150 px diameter · 2 pts</td></tr>
+      </table>
+      <ul style="margin-top:10px"><li>Every colour group totals 6 points. Size makes the risk/reward symmetry visible without a word of explanation: smaller means worth more.</li></ul>
+    </section>
+
+    <section>
+      <h3>MOTION &amp; FEEDBACK</h3>
+      <ul>
+        <li><b>Ball throw:</b> 350 ms arc, <code>ease-out-quad</code>. In Godot: <code>Tween.TRANS_QUAD, EASE_OUT</code>.</li>
+        <li><b>Hole hit:</b> 120 ms scale 1→1.22→1 plus a bulb flare and a short haptic tap.</li>
+        <li><b>Score popup:</b> "+6" rises 24 px out of the hole and fades over 600 ms.</li>
+        <li><b>Horse advance:</b> 600 ms <code>ease-out-back</code> — the slight overshoot is what makes it feel like momentum.</li>
+        <li><b>Screen shake:</b> red hits only, 4 px / 100 ms. Any more than that becomes fatiguing fast.</li>
+        <li><b>Audio:</b> hoofbeat tempo tracks the player's speed; crowd noise swells as the gap narrows. (AudioDirector is already written for exactly this.)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>PORTING TO GODOT</h3>
+      <ul>
+        <li>Keep every colour in one place — <code>res://ui/theme/palette.gd</code> as <code>const</code> values — and derive the <code>.tres</code> theme from those.</li>
+        <li>Button and card styles should be 9-slice <code>StyleBoxTexture</code>, not <code>StyleBoxFlat</code>. Wood grain and cream paper cannot be faked with a gradient.</li>
+        <li>The main <code>Theme</code> resource needs all four states — normal / hover / pressed / disabled — defined for <code>Button</code>, <code>Label</code>, <code>Panel</code> and <code>PanelContainer</code>.</li>
+        <li><code>stretch/mode=canvas_items</code> is already correct; add <code>aspect=expand</code> so tablets get side padding instead of stretched art.</li>
+        <li>Blinking bulbs are an <code>AnimationPlayer</code> + <code>modulate</code> job, not a shader — free on mobile GPUs.</li>
+        <li>Update the StyleBoxFlat colours already in <code>ScoringBoard.tscn</code> to this palette: red <code>#C8352C</code>, yellow <code>#F5B942</code>, green <code>#46A055</code>.</li>
+      </ul>
+    </section>
+
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    document.querySelectorAll('.view').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');
+    document.getElementById('v-'+t.dataset.v).classList.add('on');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+/* Toggle + segment demos — so the controls feel alive */
+document.querySelectorAll('.toggle').forEach(function(el){
+  el.addEventListener('click',function(){el.classList.toggle('on')});
+});
+document.querySelectorAll('.seg button').forEach(function(b){
+  b.addEventListener('click',function(){
+    b.parentNode.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');
+  });
+});
+document.querySelectorAll('.hcard').forEach(function(c){
+  c.addEventListener('click',function(){
+    c.parentNode.querySelectorAll('.hcard').forEach(function(x){x.classList.remove('on')});
+    c.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>
