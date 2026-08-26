@@ -27,11 +27,14 @@ func _start_default_race() -> void:
 
 
 func _spawn_ai_controllers(racer_ids: Array[int]) -> void:
-	var difficulty: GameState.Difficulty = GameState.difficulty_for_level(GameState.current_level)
+	var difficulties := GameState.ai_difficulties_for_level(GameState.current_level)
+	var i := 0
 	for rid in racer_ids:
 		if rid == GameState.player_racer_id:
 			continue
+		var difficulty: GameState.Difficulty = difficulties[i] if i < difficulties.size() else GameState.Difficulty.EASY
 		add_child(AIController.new(rid, difficulty))
+		i += 1
 
 
 func setup_race(racer_ids: Array[int], player_id: int) -> void:

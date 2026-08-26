@@ -6,9 +6,9 @@ extends Control
 ## "MAIN MENU"): tent valance, wood board, bulb string, marquee title,
 ## progress chips, a dominant CONTINUE/PLAY CTA, and secondary actions.
 ##
-## Only CONTINUE is wired up for now — everything else is present for
-## visual fidelity but intentionally inert until its system exists
-## (level select, quick race, stats, settings, sound, profile, info, ads).
+## CONTINUE and LEVEL SELECT are wired up — everything else is present
+## for visual fidelity but intentionally inert until its system exists
+## (quick race, stats, settings, sound, profile, info, ads).
 ## -----------------------------------------------------------------------
 
 const NIGHT := Color("150f0e")
@@ -201,7 +201,9 @@ func _build_button_stack() -> VBoxContainer:
 	continue_btn.pressed.connect(_on_continue_pressed)
 	stack.add_child(continue_btn)
 
-	stack.add_child(_make_button("🎯 LEVEL SELECT", RED, RED_DARK, CREAM, 84, 30))
+	var level_select_btn := _make_button("🎯 LEVEL SELECT", RED, RED_DARK, CREAM, 84, 30)
+	level_select_btn.pressed.connect(_on_level_select_pressed)
+	stack.add_child(level_select_btn)
 
 	var small_row := HBoxContainer.new()
 	small_row.add_theme_constant_override("separation", 22)
@@ -322,3 +324,7 @@ func _build_ad_slot() -> Panel:
 
 func _on_continue_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+
+
+func _on_level_select_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/menu/LevelSelect.tscn")
