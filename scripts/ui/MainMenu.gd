@@ -6,9 +6,9 @@ extends Control
 ## "MAIN MENU"): tent valance, wood board, bulb string, marquee title,
 ## progress chips, a dominant CONTINUE/PLAY CTA, and secondary actions.
 ##
-## CONTINUE and LEVEL SELECT are wired up — everything else is present
-## for visual fidelity but intentionally inert until its system exists
-## (quick race, stats, settings, sound, profile, info, ads).
+## NEW GAME/CONTINUE and LEVEL SELECT are wired up — everything else is
+## present for visual fidelity but intentionally inert until its system
+## exists (stats, settings, sound, profile, info, ads).
 ## -----------------------------------------------------------------------
 
 const NIGHT := Color("150f0e")
@@ -22,8 +22,6 @@ const RED_DARK := Color("8f2019")
 const GOLD := Color("f5b942")
 const GOLD_DEEP := Color("c98716")
 const BULB := Color("ffe9a8")
-const TEAL := Color("2e8c7e")
-const TEAL_DARK := Color("1d5f55")
 const INK := Color("22120a")
 
 const ALFA_SLAB := preload("res://assets/fonts/AlfaSlabOne-Regular.ttf")
@@ -161,7 +159,7 @@ func _build_chip_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 14)
-	row.add_child(_make_chip("🏅 Level %d" % GameState.current_level))
+	row.add_child(_make_chip("🏅 Level %d" % GameState.next_playable_level()))
 	row.add_child(_make_chip("🎟️ 12 tickets"))
 	row.add_child(_make_chip("🔥 3-day streak"))
 	return row
@@ -196,7 +194,7 @@ func _build_button_stack() -> VBoxContainer:
 	stack.custom_minimum_size = Vector2(600, 0)
 	stack.add_theme_constant_override("separation", 22)
 
-	var continue_label := "▶ PLAY" if GameState.current_level <= 1 else "▶ CONTINUE"
+	var continue_label := "▶ NEW GAME" if not GameState.has_progress() else "▶ CONTINUE"
 	var continue_btn := _make_button(continue_label, GOLD, GOLD_DEEP, INK, 96, 34)
 	continue_btn.pressed.connect(_on_continue_pressed)
 	stack.add_child(continue_btn)
@@ -205,15 +203,8 @@ func _build_button_stack() -> VBoxContainer:
 	level_select_btn.pressed.connect(_on_level_select_pressed)
 	stack.add_child(level_select_btn)
 
-	var small_row := HBoxContainer.new()
-	small_row.add_theme_constant_override("separation", 22)
-	var quick_race := _make_button("⚡ QUICK RACE", TEAL, TEAL_DARK, CREAM, 64, 22)
-	quick_race.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	small_row.add_child(quick_race)
 	var stats := _make_ghost_button("🏆 STATS", 64, 22)
-	stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	small_row.add_child(stats)
-	stack.add_child(small_row)
+	stack.add_child(stats)
 
 	return stack
 
@@ -323,6 +314,7 @@ func _build_ad_slot() -> Panel:
 
 
 func _on_continue_pressed() -> void:
+	GameState.current_level = GameState.next_playable_level()
 	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
 
 

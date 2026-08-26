@@ -4,12 +4,13 @@ extends Control
 ## Level picker, styled to match the Retro Carnival system (tent-top +
 ## wood board from MainMenu). Loosely based on design/ui-prototype.html's
 ## "05 LEVEL MAP" screen, simplified to a scrollable grid of level tickets
-## since there's no save/progress system yet to justify the design's
-## done/now/locked path — every level is just directly playable.
+## instead of the winding path (same done/now/locked idea, flatter layout).
 ##
-## Each ticket shows the level's 4 AI opponents as easy/medium/hard pips
-## (GameState.level_composition), so the difficulty curve is legible at
-## a glance instead of hidden behind a number.
+## Each unlocked ticket shows the level's 4 AI opponents as easy/medium/
+## hard pips (GameState.level_composition), so the difficulty curve is
+## legible at a glance instead of hidden behind a number. Lock state comes
+## straight from GameState.is_level_unlocked() — sequential, one level
+## ahead of your saved progress.
 ## -----------------------------------------------------------------------
 
 const WOOD := Color("4a2c1a")
@@ -17,13 +18,13 @@ const WOOD_DARK := Color("2f1b10")
 const TENT_2 := Color("3a1e17")
 const CREAM := Color("f8edd6")
 const PARCHMENT := Color("e9d5ac")
+const PARCHMENT_2 := Color("d8be8a")
 const INK := Color("22120a")
 const GOLD := Color("f5b942")
 const GOLD_DEEP := Color("c98716")
 const RED := Color("c8352c")
 const RED_DARK := Color("8f2019")
 const GREEN := Color("46a055")
-const WOOD_LINE := Color("6b4a2e")
 
 const ALFA_SLAB := preload("res://assets/fonts/AlfaSlabOne-Regular.ttf")
 const BUNGEE := preload("res://assets/fonts/Bungee-Regular.ttf")
@@ -141,21 +142,28 @@ func _build_grid() -> void:
 
 
 func _make_level_card(level_id: int) -> Control:
+	var unlocked := GameState.is_level_unlocked(level_id)
+	var cleared := level_id <= GameState.highest_completed_level
+
 	var card := Button.new()
 	card.custom_minimum_size = CARD_SIZE
 	card.text = ""
-	card.pressed.connect(_on_level_pressed.bind(level_id))
+	card.disabled = not unlocked
+	if unlocked:
+		card.pressed.connect(_on_level_pressed.bind(level_id))
 
+	var bg_color := PARCHMENT if unlocked else Color("5c4433")
 	var style := StyleBoxFlat.new()
-	style.bg_color = PARCHMENT
+	style.bg_color = bg_color
 	style.set_corner_radius_all(18)
-	style.border_color = WOOD
+	style.border_color = WOOD if unlocked else Color("3a2416")
 	style.set_border_width_all(3)
 	style.border_width_bottom = 8
 	style.shadow_size = 4
 	style.shadow_color = Color(0, 0, 0, 0.3)
 	card.add_theme_stylebox_override("normal", style)
 	card.add_theme_stylebox_override("hover", style)
+	card.add_theme_stylebox_override("disabled", style)
 
 	var pressed_style := style.duplicate()
 	pressed_style.border_width_bottom = 3
@@ -175,9 +183,26 @@ func _make_level_card(level_id: int) -> Control:
 	number.text = "LEVEL %d" % level_id
 	number.add_theme_font_override("font", BUNGEE)
 	number.add_theme_font_size_override("font_size", 24)
-	number.add_theme_color_override("font_color", INK)
+	number.add_theme_color_override("font_color", INK if unlocked else PARCHMENT_2)
 	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(number)
+
+	if not unlocked:
+		var lock := Label.new()
+		lock.text = "🔒"
+		lock.add_theme_font_size_override("font_size", 30)
+		lock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		content.add_child(lock)
+
+		var hint := Label.new()
+		hint.text = "CLEAR LEVEL %d FIRST" % (level_id - 1)
+		hint.add_theme_font_override("font", BUNGEE)
+		hint.add_theme_font_size_override("font_size", 12)
+		hint.add_theme_color_override("font_color", PARCHMENT_2)
+		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		content.add_child(hint)
+
+		return card
 
 	var pips := HBoxContainer.new()
 	pips.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -192,10 +217,10 @@ func _make_level_card(level_id: int) -> Control:
 			pips.add_child(_make_pip(pip_colors[tier]))
 
 	var tag := Label.new()
-	tag.text = _difficulty_tag(counts)
+	tag.text = "✓ CLEARED" if cleared else _difficulty_tag(counts)
 	tag.add_theme_font_override("font", BUNGEE)
 	tag.add_theme_font_size_override("font_size", 14)
-	tag.add_theme_color_override("font_color", _difficulty_tag_color(counts))
+	tag.add_theme_color_override("font_color", Color("2c6b37") if cleared else _difficulty_tag_color(counts))
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(tag)
 
