@@ -1,21 +1,35 @@
 extends Control
 ## BallThrower
 ## -----------------------------------------------------------------------
-## Full-screen input layer for the player's throw. Swipe anywhere on
-## screen: the horizontal release position picks the nearest hole on the
-## ScoringBoard, the ball flies there, then scores through the exact same
-## GameEvents.report_score() funnel AI opponents use.
+## Full-screen input layer for the player's throw. This is real 2D
+## projectile motion, not an auto-aimed lock-on: the swipe's direction and
+## speed set the ball's launch velocity, gravity pulls it down every
+## frame, and it only scores if its actual flight path overlaps a hole.
+## Bad swipes miss — short throws fall short, wild angles fly wide.
 ## -----------------------------------------------------------------------
 
 const BALL_RADIUS := 30.0
-const FLIGHT_TIME := 0.45
-const ARC_HEIGHT := 220.0
-const MIN_SWIPE_DISTANCE := 20.0
 const BALL_PARK_MARGIN_BOTTOM := 140.0
+const MIN_SWIPE_DISTANCE := 40.0
+
+## Tuning: how a swipe (measured in screen px) becomes a launch velocity
+## (px/s), and how hard gravity pulls it back down. Bigger GRAVITY or
+## smaller VELOCITY_SCALE both make the throw feel heavier/harder.
+const GRAVITY := 2500.0
+const VELOCITY_SCALE := 4.4
+const MAX_LAUNCH_SPEED := 2800.0
+const PHYSICS_SUBSTEP := 1.0 / 240.0
+const OUT_OF_BOUNDS_MARGIN := 120.0
 
 var _drag_start: Vector2 = Vector2.ZERO
 var _dragging: bool = false
 var _current_ball: Control = null
+
+var _flying: bool = false
+var _flight_ball: Control = null
+var _ball_pos: Vector2 = Vector2.ZERO
+var _ball_velocity: Vector2 = Vector2.ZERO
+var _board: Node = null
 
 
 func _ready() -> void:
@@ -23,6 +37,7 @@ func _ready() -> void:
 	_build_arc_hint()
 	_build_swipe_hint()
 	_spawn_ready_ball()
+	set_process(false)
 
 
 func _build_arc_hint() -> void:
@@ -37,7 +52,7 @@ func _build_arc_hint() -> void:
 
 func _build_swipe_hint() -> void:
 	var hint := Label.new()
-	hint.text = "👆 SWIPE — power & angle"
+	hint.text = "👆 FLICK — aim & power matter"
 	hint.add_theme_font_size_override("font_size", 18)
 	hint.add_theme_color_override("font_color", Color("d8be8a"))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -70,42 +85,76 @@ func _handle_press_release(pressed: bool, pos: Vector2) -> void:
 
 
 func _on_swipe_released(start: Vector2, end: Vector2) -> void:
-	if not GameState.run_in_progress:
+	if not GameState.run_in_progress or _current_ball == null or _flying:
 		return
-	if _current_ball == null:
+	var swipe := end - start
+	if swipe.length() < MIN_SWIPE_DISTANCE:
 		return
-	if start.distance_to(end) < MIN_SWIPE_DISTANCE:
-		return
-	var board := get_tree().get_first_node_in_group(&"scoring_board")
-	if board == null:
-		return
-	var hole: ScoringHole = board.closest_hole_to_x(end.x)
-	if hole == null:
-		return
-	_throw_ball(start, board.global_landing_point(hole.id), hole)
+	_board = get_tree().get_first_node_in_group(&"scoring_board")
+	_launch_ball(swipe)
 
 
-func _throw_ball(start: Vector2, target: Vector2, hole: ScoringHole) -> void:
-	GameEvents.ball_thrown.emit(GameState.player_racer_id, (target - start).normalized(), 1.0)
-
+func _launch_ball(swipe: Vector2) -> void:
 	var ball := _current_ball
 	_current_ball = null
-	var origin := ball.global_position + ball.size / 2.0
 
-	var tween := create_tween()
-	tween.tween_method(
-		func(t: float) -> void:
-			var pos := origin.lerp(target, t)
-			pos.y -= sin(t * PI) * ARC_HEIGHT
-			ball.global_position = pos - ball.size / 2.0,
-		0.0, 1.0, FLIGHT_TIME
+	var speed: float = clampf(swipe.length() * VELOCITY_SCALE, 0.0, MAX_LAUNCH_SPEED)
+	_ball_velocity = swipe.normalized() * speed
+	_ball_pos = ball.global_position + ball.size / 2.0
+	_flight_ball = ball
+	_flying = true
+	set_process(true)
+
+	GameEvents.ball_thrown.emit(GameState.player_racer_id, swipe.normalized(), speed / MAX_LAUNCH_SPEED)
+
+
+func _process(delta: float) -> void:
+	if not _flying:
+		return
+	var remaining := delta
+	while remaining > 0.0:
+		var dt: float = minf(PHYSICS_SUBSTEP, remaining)
+		remaining -= dt
+		_ball_velocity.y += GRAVITY * dt
+		_ball_pos += _ball_velocity * dt
+
+		var hole: ScoringHole = _board.hole_at_point(_ball_pos) if _board != null else null
+		if hole != null:
+			_score_hole(hole)
+			return
+		if _is_out_of_bounds():
+			_miss_ball()
+			return
+	_flight_ball.global_position = _ball_pos - _flight_ball.size / 2.0
+
+
+func _is_out_of_bounds() -> bool:
+	return (
+		_ball_pos.y > size.y + OUT_OF_BOUNDS_MARGIN
+		or _ball_pos.y < -OUT_OF_BOUNDS_MARGIN
+		or _ball_pos.x < -OUT_OF_BOUNDS_MARGIN
+		or _ball_pos.x > size.x + OUT_OF_BOUNDS_MARGIN
 	)
-	tween.finished.connect(func() -> void:
-		ball.queue_free()
-		GameEvents.ball_landed.emit(GameState.player_racer_id, hole.id)
-		GameEvents.report_score(GameState.player_racer_id, hole.points, hole.id)
-		_spawn_ready_ball()
-	)
+
+
+func _score_hole(hole: ScoringHole) -> void:
+	_end_flight()
+	GameEvents.ball_landed.emit(GameState.player_racer_id, hole.id)
+	GameEvents.report_score(GameState.player_racer_id, hole.points, hole.id)
+	_spawn_ready_ball()
+
+
+func _miss_ball() -> void:
+	_end_flight()
+	_spawn_ready_ball()
+
+
+func _end_flight() -> void:
+	_flying = false
+	set_process(false)
+	_flight_ball.queue_free()
+	_flight_ball = null
+	_board = null
 
 
 func _spawn_ready_ball() -> void:

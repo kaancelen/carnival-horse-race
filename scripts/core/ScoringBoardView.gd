@@ -17,6 +17,10 @@ const CREAM := Color("f8edd6")
 const ALFA_SLAB := preload("res://assets/fonts/AlfaSlabOne-Regular.ttf")
 const BUNGEE := preload("res://assets/fonts/Bungee-Regular.ttf")
 
+## Real hitbox is a bit tighter than the drawn circle — a clean center hit
+## should feel earned, not just "close enough".
+const HOLE_HIT_FACTOR := 0.8
+
 var _holes: Array[ScoringHole] = []
 var _hole_nodes: Dictionary = {}
 
@@ -39,26 +43,19 @@ func _ready() -> void:
 	GameEvents.racer_scored.connect(_on_racer_scored)
 
 
-func closest_hole_to_x(global_x: float) -> ScoringHole:
-	var best: ScoringHole = null
-	var best_dist := INF
+## Physical hit test for the thrown ball's current position — a real
+## projectile either overlaps a hole's (slightly tightened) circle or it
+## doesn't. No more "closest hole wins" auto-targeting.
+func hole_at_point(global_pos: Vector2) -> ScoringHole:
 	for hole in _holes:
 		var node: Control = _hole_nodes.get(hole.id)
 		if node == null:
 			continue
-		var center_x: float = node.get_global_rect().get_center().x
-		var dist: float = absf(center_x - global_x)
-		if dist < best_dist:
-			best_dist = dist
-			best = hole
-	return best
-
-
-func global_landing_point(hole_id: StringName) -> Vector2:
-	var node: Control = _hole_nodes.get(hole_id)
-	if node == null:
-		return get_global_rect().get_center()
-	return node.get_global_rect().get_center()
+		var rect := node.get_global_rect()
+		var radius: float = rect.size.x / 2.0 * HOLE_HIT_FACTOR
+		if rect.get_center().distance_to(global_pos) <= radius:
+			return hole
+	return null
 
 
 func _decorate_hole(hole: ScoringHole) -> void:
